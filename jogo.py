@@ -22,6 +22,7 @@ VELOCIDADE_MONSTRO = 3
 TEMPO_ENTRE_DIAMANTES = 4000
 ALCANCE_PODER_PLAYER = 300
 TEMPO_MONSTRO_EXPLODINDO = 500
+VELOCIDADE_PLATAFORMA = 3
 
 background_img = pygame.image.load("assets/fundo_jogo.png").convert()
 player_img_r = pygame.image.load("assets/viking-r.png").convert_alpha()
@@ -132,6 +133,7 @@ class Monster(pygame.sprite.Sprite):
             else:
                 self.image = explosion_img
                 return
+
         self.rect.x += self.speed_x
         if self.rect.right > WIDTH + DISTANCIA_PAREDES_MONSTRO:
             self.speed_x *= -1
@@ -139,6 +141,7 @@ class Monster(pygame.sprite.Sprite):
         elif self.rect.left < DISTANCIA_PAREDES_MONSTRO:
             self.speed_x *= -1
             self.facing_right = True
+
         self.image = monster_img_r if self.facing_right else monster_img_l
 
         self.shoot_timer += 1
@@ -148,6 +151,8 @@ class Monster(pygame.sprite.Sprite):
             all_sprites.add(power)
             self.shoot_timer = 0
 
+        hits = pygame.sprite.spritecollide(self, balls, True)
+
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -155,6 +160,12 @@ class Platform(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.speed_x = VELOCIDADE_PLATAFORMA
+
+    def update(self):
+        self.rect.x += self.speed_x
+        if self.rect.right >= WIDTH or self.rect.left <= 0:
+            self.speed_x *= -1
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -182,6 +193,9 @@ class Power(pygame.sprite.Sprite):
         if self.rect.right < 0 or self.rect.left > WIDTH:
             self.kill()
 
+# restante igual ao anterior, mantendo HUD, controle de fim de jogo e reinício.
+
+# Com isso, o monstro agora coleta diamantes ao encostar, e a plataforma se move de um lado ao outro automaticamente.
 def reset_game():
     global all_sprites, platforms, balls, monster_powers, player_powers, player, monster, platform, last_ball_spawn_time, game_over, win
     all_sprites = pygame.sprite.Group()
