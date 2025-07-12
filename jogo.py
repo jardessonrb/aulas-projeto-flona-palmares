@@ -13,10 +13,11 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
 # Load images (replace with your actual image paths)
+background_img = pygame.image.load("assets/fundo_jogo.png").convert()
 player_img = pygame.image.load("assets/viking4.png").convert_alpha()
 monster_img = pygame.image.load("assets/monstro-l.png").convert_alpha()
 power_img = pygame.image.load("assets/fogo3.png").convert_alpha()
-platform_img = pygame.image.load("assets/fundo_jogo.png").convert_alpha()
+platform_img = pygame.image.load("assets/plataforma2.png").convert_alpha()
 ball_img = pygame.image.load("assets/viking4.png").convert_alpha()
 
 class Player(pygame.sprite.Sprite):
@@ -25,22 +26,25 @@ class Player(pygame.sprite.Sprite):
         self.image = player_img
         self.rect = self.image.get_rect()
         self.rect.x = 50
-        self.rect.y = HEIGHT - 60
+        self.rect.y = HEIGHT - 50
         self.speed_x = 0
         self.speed_y = 0
         self.on_ground = False
         self.balls = 0
 
     def update(self):
-        self.speed_y += 0.8
+        self.speed_y += 0.8  # gravity
         keys = pygame.key.get_pressed()
         self.speed_x = 0
         if keys[pygame.K_LEFT]:
             self.speed_x = -5
         if keys[pygame.K_RIGHT]:
             self.speed_x = 5
-        if keys[pygame.K_SPACE] and self.on_ground:
+        if keys[pygame.K_UP] and self.on_ground:
             self.speed_y = -12
+        if keys[pygame.K_DOWN]:
+            self.speed_y += 0.5
+
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
@@ -48,6 +52,8 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = HEIGHT
             self.speed_y = 0
             self.on_ground = True
+        else:
+            self.on_ground = False
 
         if self.rect.left < 0:
             self.rect.left = 0
@@ -113,7 +119,7 @@ player_powers = pygame.sprite.Group()
 
 player = Player()
 monster = Monster()
-platform = Platform(WIDTH//2 - 50, HEIGHT//2)
+platform = Platform(WIDTH//2 - 50, HEIGHT//2 - 150)
 
 all_sprites.add(player, monster, platform)
 platforms.add(platform)
@@ -164,7 +170,7 @@ while running:
         print("You Lose!")
         running = False
 
-    screen.fill(WHITE)
+    screen.blit(background_img, (0, 0))
     all_sprites.draw(screen)
     pygame.draw.rect(screen, RED, (10, 10, monster.health * 20, 20))
     pygame.display.flip()
