@@ -63,6 +63,12 @@ class Player(pygame.sprite.Sprite):
         self.q_animating = False
         self.q_stage = 0
         self.q_timer = 0
+    
+    def limitar_tela(self):
+        if self.rect.left < 0:
+            self.rect.left = 0
+        if self.rect.right > WIDTH:
+            self.rect.right = WIDTH
 
     def update(self):
         self.speed_y += 0.8
@@ -90,10 +96,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.on_ground = False
 
-        if self.rect.left < 0:
-            self.rect.left = 0
-        if self.rect.right > WIDTH:
-            self.rect.right = WIDTH
+        self.limitar_tela()
 
         if self.q_animating:
             now = pygame.time.get_ticks()
@@ -212,6 +215,18 @@ def reset_game():
     game_over = False
     win = False
 
+def soltar_poder():
+    power = Power(player.rect.centerx, player.rect.centery, 7 if player.facing_right else -7, player_power_img)
+    player_powers.add(power)
+    all_sprites.add(power)
+    player.powers -= 1
+
+def desenhar_infos():
+    monster_text = font.render(f"Vida do monstro: {monster.health}", True, BLACK)
+    player_text = font.render(f"Poderes jogador: {player.powers}", True, BLACK)
+    screen.blit(monster_text, (10, 10))
+    screen.blit(player_text, (10, 40))
+
 reset_game()
 
 running = True
@@ -230,10 +245,7 @@ while running:
         else:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p and player.powers > 0:
-                    power = Power(player.rect.centerx, player.rect.centery, 7 if player.facing_right else -7, player_power_img)
-                    player_powers.add(power)
-                    all_sprites.add(power)
-                    player.powers -= 1
+                   soltar_poder()
                 if event.key == pygame.K_q:
                     if not player.q_animating:
                         player.q_animating = True
@@ -277,10 +289,7 @@ while running:
 
         screen.blit(background_img, (0, 0))
         all_sprites.draw(screen)
-        monster_text = font.render(f"Vida do monstro: {monster.health}", True, BLACK)
-        player_text = font.render(f"Poderes jogador: {player.powers}", True, BLACK)
-        screen.blit(monster_text, (10, 10))
-        screen.blit(player_text, (10, 40))
+        desenhar_infos()
 
     else:
         screen.blit(background_img, (0, 0))
