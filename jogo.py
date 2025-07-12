@@ -14,11 +14,11 @@ RED = (255, 0, 0)
 
 # Load images (replace with your actual image paths)
 background_img = pygame.image.load("assets/fundo_jogo.png").convert()
-player_img = pygame.image.load("assets/viking4.png").convert_alpha()
+player_img = pygame.image.load("assets/viking-r.png").convert_alpha()
 monster_img = pygame.image.load("assets/monstro-l.png").convert_alpha()
 power_img = pygame.image.load("assets/fogo3.png").convert_alpha()
 platform_img = pygame.image.load("assets/plataforma2.png").convert_alpha()
-ball_img = pygame.image.load("assets/viking4.png").convert_alpha()
+diamont = pygame.image.load("assets/diamante.png").convert_alpha()
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -93,7 +93,7 @@ class Platform(pygame.sprite.Sprite):
 class Ball(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = ball_img
+        self.image = diamont
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -119,7 +119,7 @@ player_powers = pygame.sprite.Group()
 
 player = Player()
 monster = Monster()
-platform = Platform(WIDTH//2 - 50, HEIGHT//2 - 150)
+platform = Platform(WIDTH//2 - 150, HEIGHT//2 + 225)
 
 all_sprites.add(player, monster, platform)
 platforms.add(platform)
