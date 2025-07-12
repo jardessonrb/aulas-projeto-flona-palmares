@@ -6,7 +6,7 @@ pygame.init()
 
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Monster Game")
+pygame.display.set_caption("Flona Game")
 clock = pygame.time.Clock()
 
 WHITE = (255, 255, 255)
@@ -14,7 +14,7 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 GRAY = (200, 200, 200)
 
-ALTURA_SALTO = -15
+ALTURA_SALTO = -14
 TEMPO_ENVIO_PODER_MONSTRO = 200
 DISTANCIA_PAREDES_MONSTRO = 10
 VIDAS_MONSTRO = 3
@@ -22,7 +22,7 @@ VELOCIDADE_MONSTRO = 3
 TEMPO_ENTRE_DIAMANTES = 4000
 ALCANCE_PODER_PLAYER = 300
 TEMPO_MONSTRO_EXPLODINDO = 500
-VELOCIDADE_PLATAFORMA = 3
+VELOCIDADE_PLATAFORMA = 2  # diminuída para suavidade
 
 background_img = pygame.image.load("assets/fundo_jogo.png").convert()
 player_img_r = pygame.image.load("assets/viking-r.png").convert_alpha()
@@ -193,9 +193,6 @@ class Power(pygame.sprite.Sprite):
         if self.rect.right < 0 or self.rect.left > WIDTH:
             self.kill()
 
-# restante igual ao anterior, mantendo HUD, controle de fim de jogo e reinício.
-
-# Com isso, o monstro agora coleta diamantes ao encostar, e a plataforma se move de um lado ao outro automaticamente.
 def reset_game():
     global all_sprites, platforms, balls, monster_powers, player_powers, player, monster, platform, last_ball_spawn_time, game_over, win
     all_sprites = pygame.sprite.Group()
@@ -206,7 +203,7 @@ def reset_game():
 
     player = Player()
     monster = Monster()
-    platform = Platform(WIDTH//2 - 150, HEIGHT//2 + 225)
+    platform = Platform(WIDTH//2 - 150, HEIGHT//2 + 235)
 
     all_sprites.add(player, monster, platform)
     platforms.add(platform)
@@ -216,6 +213,7 @@ def reset_game():
     win = False
 
 reset_game()
+
 running = True
 while running:
     clock.tick(60)
@@ -250,11 +248,13 @@ while running:
 
         all_sprites.update()
 
-        if pygame.sprite.spritecollide(player, platforms, False):
-            if player.speed_y > 0:
+        # Mover player junto com a plataforma se em cima
+        if pygame.sprite.collide_rect(player, platform):
+            if player.speed_y >= 0 and player.rect.bottom <= platform.rect.bottom:
                 player.rect.bottom = platform.rect.top
                 player.speed_y = 0
                 player.on_ground = True
+                player.rect.x += platform.speed_x  # move junto com a plataforma
 
         hits = pygame.sprite.spritecollide(player, balls, True)
         for hit in hits:
@@ -277,8 +277,8 @@ while running:
 
         screen.blit(background_img, (0, 0))
         all_sprites.draw(screen)
-        monster_text = font.render(f"Monstro Vida: {monster.health}", True, BLACK)
-        player_text = font.render(f"Player Poder: {player.powers}", True, BLACK)
+        monster_text = font.render(f"Vida do monstro: {monster.health}", True, BLACK)
+        player_text = font.render(f"Poderes jogador: {player.powers}", True, BLACK)
         screen.blit(monster_text, (10, 10))
         screen.blit(player_text, (10, 40))
 
