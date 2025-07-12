@@ -15,31 +15,26 @@ BLACK = (0, 0, 0)
 GRAY = (200, 200, 200)
 
 ALTURA_SALTO = -15
-TEMPO_ENVIO_PODER_MONSTRO = 130
+TEMPO_ENVIO_PODER_MONSTRO = 200
 DISTANCIA_PAREDES_MONSTRO = 10
 VIDAS_MONSTRO = 3
 VELOCIDADE_MONSTRO = 3
-TEMPO_ENTRE_DIAMANTES = 6000
+TEMPO_ENTRE_DIAMANTES = 4000
+ALCANCE_PODER_PLAYER = 300
+TEMPO_MONSTRO_EXPLODINDO = 500
 
-# Load images
 background_img = pygame.image.load("assets/fundo_jogo.png").convert()
-
-# Player images
 player_img_r = pygame.image.load("assets/viking-r.png").convert_alpha()
 player_img_l = pygame.image.load("assets/viking-l.png").convert_alpha()
 player_q1_r = pygame.image.load("assets/viking-q1-r.png").convert_alpha()
 player_q2_r = pygame.image.load("assets/viking-q2-r.png").convert_alpha()
 player_q1_l = pygame.image.load("assets/viking-q1-l.png").convert_alpha()
 player_q2_l = pygame.image.load("assets/viking-q2-l.png").convert_alpha()
-
-# Monster images
 monster_img_r = pygame.image.load("assets/monstro-r.png").convert_alpha()
 monster_img_l = pygame.image.load("assets/monstro-l.png").convert_alpha()
-
-# Power images
 power_img = pygame.image.load("assets/fogo3.png").convert_alpha()
 player_power_img = pygame.image.load("assets/poder-viking.png").convert_alpha()
-
+explosion_img = pygame.image.load("assets/explosao.png").convert_alpha()
 platform_img = pygame.image.load("assets/plataforma2.png").convert_alpha()
 diamont_img = pygame.image.load("assets/diamante.png").convert_alpha()
 
@@ -99,7 +94,6 @@ class Player(pygame.sprite.Sprite):
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
 
-        # Q animation
         if self.q_animating:
             now = pygame.time.get_ticks()
             if self.q_stage == 0:
@@ -128,16 +122,23 @@ class Monster(pygame.sprite.Sprite):
         self.health = VIDAS_MONSTRO
         self.shoot_timer = 0
         self.facing_right = False
+        self.exploding = False
+        self.explosion_start = 0
 
     def update(self):
+        if self.exploding:
+            if pygame.time.get_ticks() - self.explosion_start > TEMPO_MONSTRO_EXPLODINDO:
+                self.exploding = False
+            else:
+                self.image = explosion_img
+                return
         self.rect.x += self.speed_x
-        if self.rect.right > WIDTH + DISTANCIA_PAREDES_MONSTRO: 
+        if self.rect.right > WIDTH + DISTANCIA_PAREDES_MONSTRO:
             self.speed_x *= -1
             self.facing_right = False
         elif self.rect.left < DISTANCIA_PAREDES_MONSTRO:
             self.speed_x *= -1
             self.facing_right = True
-
         self.image = monster_img_r if self.facing_right else monster_img_l
 
         self.shoot_timer += 1
@@ -170,9 +171,14 @@ class Power(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.speed_x = speed_x
+        self.distance_travelled = 0
 
     def update(self):
         self.rect.x += self.speed_x
+        if self.image == player_power_img:
+            self.distance_travelled += abs(self.speed_x)
+            if self.distance_travelled >= ALCANCE_PODER_PLAYER:
+                self.kill()
         if self.rect.right < 0 or self.rect.left > WIDTH:
             self.kill()
 
@@ -196,7 +202,6 @@ def reset_game():
     win = False
 
 reset_game()
-
 running = True
 while running:
     clock.tick(60)
@@ -244,6 +249,8 @@ while running:
         hits = pygame.sprite.spritecollide(monster, player_powers, True)
         for hit in hits:
             monster.health -= 1
+            monster.exploding = True
+            monster.explosion_start = pygame.time.get_ticks()
             hit.kill()
             if monster.health <= 0:
                 game_over = True
