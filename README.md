@@ -30,7 +30,7 @@ Neste jogo, o jogador controla um **pequeno guerreiro viking** em uma batalha co
 
 🎥 **Vídeo demonstrativo do jogo:**
 
-[📺 Clique aqui para assistir o vídeo do jogo Viking](./resources/jogo_viking.mp4)
+![jogo Viking](./resources/jogo_viking.gif)
 
 ---
 
